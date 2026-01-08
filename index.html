@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlexaMotion 5.0 | Real-Time Body Tracking</title>
+    <meta name="description" content="Futuristic Real-Time Body Tracking & Environment Detection Web App">
+
+    <!-- Google Fonts for Futuristic Look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@300;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- MediaPipe Styles -->
+    <style>
+        .mediapipe-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+        }
+
+        .video-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            /* Mirror effect */
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- Header -->
+        <header class="glass-header">
+            <div class="logo-area">
+                <span class="material-icons logo-icon">accessibility_new</span>
+                <div>
+                    <h1>PlexaMotion 5.0</h1>
+                    <p class="subtitle">Real-Time Body & Motion Intelligence</p>
+                </div>
+            </div>
+            <div class="system-status">
+                <span class="status-dot"></span> System Active
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-grid">
+
+            <!-- Left Panel: Vision Feed -->
+            <section class="vision-panel glass-card">
+                <div class="vision-header">
+                    <h2><span class="material-icons">videocam</span> Live Feed</h2>
+                    <div class="live-indicator">LIVE</div>
+                </div>
+
+                <div class="video-container" id="videoContainer">
+                    <div class="loading-overlay" id="loadingScreen">
+                        <div class="spinner"></div>
+                        <p>Initializing Neural Core...</p>
+                    </div>
+                    <button id="cameraToggle" class="camera-toggle-btn" title="Switch Camera">
+                        <span class="material-icons">flip_camera_ios</span>
+                    </button>
+                    <button id="mirrorToggle" class="mirror-toggle-btn" title="Mirror View">
+                        <span class="material-icons">flip</span>
+                    </button>
+                    <video id="webcam" class="video-feed" autoplay playsinline></video>
+                    <canvas id="output_canvas" class="mediapipe-canvas"></canvas>
+                </div>
+            </section>
+
+            <!-- Right Panel: Intelligence Dashboard -->
+            <aside class="dashboard-panel">
+
+                <!-- Card 1: Body Tracking Status -->
+                <div class="glass-card stat-card glow-blue">
+                    <div class="card-title">
+                        <span class="material-icons">directions_walk</span> Body Tracking
+                    </div>
+                    <div class="card-value" id="bodyStatus">Searching...</div>
+                    <div class="card-sub">Confidence: <span id="confidenceScore">0%</span></div>
+                </div>
+
+                <!-- Card 2: Environment Detection -->
+                <div class="glass-card stat-card glow-cyan">
+                    <div class="card-title">
+                        <span class="material-icons">public</span> Environment
+                    </div>
+                    <div class="card-value neon-text" id="envStatus">Scanning...</div>
+                    <div class="coords-grid">
+                        <div class="coord-item">
+                            <span class="label">LAT</span>
+                            <span class="val" id="latVal">--.----</span>
+                        </div>
+                        <div class="coord-item">
+                            <span class="label">LON</span>
+                            <span class="val" id="lonVal">--.----</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Performance -->
+                <div class="glass-card stat-card">
+                    <div class="card-title">
+                        <span class="material-icons">speed</span> Performance
+                    </div>
+                    <div class="fps-meter">
+                        <span class="fps-val" id="fpsValue">0</span> <span class="fps-unit">FPS</span>
+                    </div>
+                </div>
+
+            </aside>
+        </main>
+
+        <!-- Footer -->
+        <footer class="glass-footer">
+            <p>PlexaMotion 5.0 | Built with <span class="highlight">MediaPipe</span> & Open Technologies</p>
+        </footer>
+
+    </div>
+
+    <!-- Connection Modal -->
+    <div id="connectionModal" class="glass-bg-overlay">
+        <div class="glass-card modal-content">
+            <h2>Select Mode</h2>
+            <div class="mode-buttons">
+                <button id="startHostBtn" class="action-btn">
+                    <span class="material-icons">desktop_windows</span>
+                    <div>
+                        <strong>Laptop Display</strong>
+                        <small>View Data Remotely</small>
+                    </div>
+                </button>
+                <button id="startSensorBtn" class="action-btn outline">
+                    <span class="material-icons">smartphone</span>
+                    <div>
+                        <strong>Phone Sensor</strong>
+                        <small>Send Data</small>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Host Panel -->
+            <div id="hostPanel" class="hidden panel-section">
+                <p>Your ID (Enter this on Phone):</p>
+                <div class="id-display" id="myPeerId">Generating...</div>
+                <p class="status-text" id="connectionStatus">Waiting for connection...</p>
+            </div>
+
+            <!-- Client Panel -->
+            <div id="clientPanel" class="hidden panel-section">
+                <input type="text" id="remotePeerIdInput" placeholder="Enter Laptop ID (e.g. 12ab34)"
+                    class="glass-input">
+                <button id="connectBtn" class="connect-btn">CONNECT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <!-- Load MediaPipe Tasks Vision Bundle -->
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>

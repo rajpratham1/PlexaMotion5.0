@@ -4,10 +4,23 @@ import {
     DrawingUtils
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/vision_bundle.js";
 
-// --- DOM Elements ---
+/* =========================
+   THEME COLORS (MATCH CSS)
+========================= */
+const THEME = {
+    primary: "#d946ef",     // Neon Magenta
+    secondary: "#7c3aed",   // Electric Purple
+    muted: "#a78bfa",
+    inactive: "#8892b0"
+};
+
+/* =========================
+   DOM ELEMENTS
+========================= */
 const video = document.getElementById("webcam");
 const canvasElement = document.getElementById("output_canvas");
 const canvasCtx = canvasElement.getContext("2d");
+
 const loadingScreen = document.getElementById("loadingScreen");
 const bodyStatus = document.getElementById("bodyStatus");
 const confidenceScore = document.getElementById("confidenceScore");
@@ -15,10 +28,11 @@ const envStatus = document.getElementById("envStatus");
 const latVal = document.getElementById("latVal");
 const lonVal = document.getElementById("lonVal");
 const fpsValue = document.getElementById("fpsValue");
+
 const cameraToggleBtn = document.getElementById("cameraToggle");
 const mirrorToggleBtn = document.getElementById("mirrorToggle");
 
-// Modal Elements
+/* --- Modal --- */
 const connectionModal = document.getElementById("connectionModal");
 const startHostBtn = document.getElementById("startHostBtn");
 const startSensorBtn = document.getElementById("startSensorBtn");
@@ -29,260 +43,219 @@ const remotePeerIdInput = document.getElementById("remotePeerIdInput");
 const connectBtn = document.getElementById("connectBtn");
 const connectionStatus = document.getElementById("connectionStatus");
 
-// --- Global Variables ---
-let poseLandmarker = undefined;
+/* =========================
+   GLOBAL STATE
+========================= */
+let poseLandmarker;
 let webcamRunning = false;
 let lastVideoTime = -1;
 let lastFrameTime = performance.now();
-let results = undefined;
-let currentFacingMode = 'user';
+let results;
+
+let currentFacingMode = "user";
 let stream = null;
 let isMirrored = true;
 
-// PeerJS / Role State
+/* --- PeerJS --- */
 let peer = null;
 let conn = null;
-let appRole = null; // 'HOST' or 'SENSOR'
-const PREFIX = "plexa-";
+let appRole = null; // HOST | SENSOR
 
-// --- Role Selection Events ---
+/* =========================
+   ROLE SELECTION
+========================= */
 startHostBtn.addEventListener("click", () => {
-    appRole = 'HOST';
-    // Host doesn't typically need camera if just displaying, 
-    // but user might want local view too. For this requirement (Remote Sensor), 
-    // Host purely displays remote data.
+    appRole = "HOST";
     hostPanel.classList.remove("hidden");
     clientPanel.classList.add("hidden");
-    initPeer(true); // Create Host ID
+    initPeer(true);
 });
 
 startSensorBtn.addEventListener("click", () => {
-    appRole = 'SENSOR';
+    appRole = "SENSOR";
     clientPanel.classList.remove("hidden");
     hostPanel.classList.add("hidden");
-    initPeer(false); // Create Client Peer
+    initPeer(false);
 });
 
 connectBtn.addEventListener("click", () => {
-    const remoteId = remotePeerIdInput.value.trim();
-    if (remoteId) connectToPeer(remoteId);
+    const id = remotePeerIdInput.value.trim();
+    if (id) connectToPeer(id);
 });
 
-// --- PeerJS Logic ---
+/* =========================
+   PEER LOGIC
+========================= */
 function initPeer(isHost) {
-    // Generate simple ID if host, or random if sensor
-    // In real app we might want user to pick, but random is fine for quick P2P
-    const myId = isHost ? Math.floor(1000 + Math.random() * 9000) : null;
+    const myId = isHost ? Math.floor(1000 + Math.random() * 9000) : undefined;
+    peer = new Peer(myId?.toString());
 
-    peer = new Peer(myId ? `${myId}` : undefined);
-
-    peer.on('open', (id) => {
-        console.log('My Peer ID is: ' + id);
+    peer.on("open", (id) => {
         if (isHost) {
             myPeerIdDisplay.innerText = id;
-            connectionStatus.innerText = "Waiting for Sensor to join...";
+            connectionStatus.innerText = "Waiting for Sensor…";
         }
     });
 
-    peer.on('connection', (c) => {
-        // HOST receives connection
+    peer.on("connection", (c) => {
         conn = c;
         setupConnection();
-        connectionModal.classList.add("hidden"); // Host starts immediately upon connection
-        alert("Sensor Connected! Receiving Data...");
-
-        // Hide local camera/loading if we are just a display
-        // or keep black screen waiting for data
+        connectionModal.classList.add("hidden");
         loadingScreen.classList.add("hidden");
-        // Clear canvas initially
         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     });
 
-    peer.on('error', (err) => {
-        console.error("PeerJS Error:", err);
-        alert("Connection Error: " + err.type);
+    peer.on("error", (err) => {
+        console.error(err);
+        alert("Peer error: " + err.type);
     });
 }
 
-function connectToPeer(remoteId) {
-    // SENSOR initiates connection
-    conn = peer.connect(remoteId);
+function connectToPeer(id) {
+    conn = peer.connect(id);
     setupConnection();
 }
 
 function setupConnection() {
-    conn.on('open', () => {
-        console.log("Connected to: " + conn.peer);
-        if (appRole === 'SENSOR') {
+    conn.on("open", () => {
+        if (appRole === "SENSOR") {
             connectionModal.classList.add("hidden");
-            // Start the sensor loop
             initLocation();
             createPoseLandmarker();
         }
     });
 
-    conn.on('data', (data) => {
-        // HOST receives data
-        if (appRole === 'HOST') {
-            handleRemoteData(data);
-        }
+    conn.on("data", (data) => {
+        if (appRole === "HOST") handleRemoteData(data);
     });
 }
 
+/* =========================
+   HOST RENDERING
+========================= */
 function handleRemoteData(data) {
-    // Update Stats
-    if (data.type === 'stats') {
-        const { detected, conf, env, lat, lon } = data;
+    if (data.type === "stats") {
+        bodyStatus.innerText = data.detected ? "DETECTED (REMOTE)" : "SEARCHING (REMOTE)";
+        bodyStatus.style.color = data.detected ? THEME.primary : THEME.inactive;
 
-        bodyStatus.innerText = detected ? "DETECTED (REMOTE)" : "SEARCHING (REMOTE)";
-        bodyStatus.style.color = detected ? "#00f3ff" : "#8892b0";
-        confidenceScore.innerText = conf;
-
-        envStatus.innerText = env;
-        latVal.innerText = lat || "--";
-        lonVal.innerText = lon || "--";
+        confidenceScore.innerText = data.conf;
+        envStatus.innerText = data.env;
+        latVal.innerText = data.lat || "--";
+        lonVal.innerText = data.lon || "--";
     }
 
-    // Draw Skeleton
-    if (data.type === 'landmarks') {
+    if (data.type === "landmarks") {
         renderRemoteLandmarks(data.landmarks);
     }
 }
 
 function renderRemoteLandmarks(landmarksList) {
-    // Ensure canvas is sized (might default to 0 if video not loaded, force size)
     canvasElement.width = 640;
     canvasElement.height = 480;
-    canvasElement.style.width = "100%";
-    canvasElement.style.height = "100%";
 
-    canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    const draw = new DrawingUtils(canvasCtx);
 
-    // Host usually doesn't need mirror unless specified, assume direct mapping
-    const drawingUtils = new DrawingUtils(canvasCtx);
-
-    for (const landmarks of landmarksList) {
-        drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS, {
-            color: "#00f3ff",
+    landmarksList.forEach(lm => {
+        draw.drawConnectors(lm, PoseLandmarker.POSE_CONNECTIONS, {
+            color: THEME.primary,
             lineWidth: 4
         });
-        drawingUtils.drawLandmarks(landmarks, {
-            color: "#ff0077",
-            radius: 3,
-            lineWidth: 2
+        draw.drawLandmarks(lm, {
+            color: THEME.secondary,
+            radius: 3
         });
-    }
-
-    canvasCtx.restore();
+    });
 }
 
-
-// --- Sensor Logic (Existing + Send) ---
-
-// Real-Time GPS
+/* =========================
+   SENSOR: GPS
+========================= */
 function initLocation() {
-    if ("geolocation" in navigator) {
-        navigator.geolocation.watchPosition(
-            (position) => {
-                const lat = position.coords.latitude.toFixed(6);
-                const lon = position.coords.longitude.toFixed(6);
+    if (!navigator.geolocation) return;
 
-                // Update Local UI
-                latVal.innerText = lat;
-                lonVal.innerText = lon;
-                envStatus.innerText = "GPS ACTIVE";
-                envStatus.style.color = "#00f3ff";
+    navigator.geolocation.watchPosition(
+        (pos) => {
+            const lat = pos.coords.latitude.toFixed(6);
+            const lon = pos.coords.longitude.toFixed(6);
 
-                // SEND TO HOST
-                if (conn && conn.open) {
-                    conn.send({
-                        type: 'stats',
-                        env: "GPS ACTIVE",
-                        lat: lat,
-                        lon: lon,
-                        detected: (bodyStatus.innerText.includes("DETECTED")),
-                        conf: confidenceScore.innerText
-                    });
-                }
-            },
-            (error) => {
-                console.warn("Geolocation watch error:", error);
-            },
-            { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
-        );
-    }
+            latVal.innerText = lat;
+            lonVal.innerText = lon;
+            envStatus.innerText = "GPS ACTIVE";
+            envStatus.style.color = THEME.primary;
+
+            if (conn?.open) {
+                conn.send({
+                    type: "stats",
+                    env: "GPS ACTIVE",
+                    lat,
+                    lon,
+                    detected: bodyStatus.innerText.includes("DETECTED"),
+                    conf: confidenceScore.innerText
+                });
+            }
+        },
+        () => {},
+        { enableHighAccuracy: true }
+    );
 }
 
-// Enable Webcam (Sensor Only)
-const createPoseLandmarker = async () => {
-    try {
-        const vision = await FilesetResolver.forVisionTasks(
-            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
-        );
-        poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
-            baseOptions: {
-                modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
-                delegate: "GPU"
-            },
-            runningMode: "VIDEO",
-            numPoses: 2
-        });
-        console.log("PoseLandmarker loaded.");
-        loadingScreen.classList.add("hidden");
-        enableCam();
-    } catch (error) {
-        console.error("Error loading PoseLandmarker:", error);
-        alert("Failed to load computer vision model.");
-    }
-};
+/* =========================
+   MEDIAPIPE INIT
+========================= */
+async function createPoseLandmarker() {
+    const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
+    );
 
-const enableCam = async () => {
-    if (!poseLandmarker) return;
-    if (webcamRunning) {
-        if (stream) stream.getTracks().forEach(track => track.stop());
-        webcamRunning = false;
-    }
+    poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+        baseOptions: {
+            modelAssetPath:
+                "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+            delegate: "GPU"
+        },
+        runningMode: "VIDEO",
+        numPoses: 2
+    });
 
-    const constraints = {
+    loadingScreen.classList.add("hidden");
+    enableCam();
+}
+
+/* =========================
+   CAMERA
+========================= */
+async function enableCam() {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+
+    stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480, facingMode: currentFacingMode }
-    };
+    });
 
-    try {
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = stream;
-        video.addEventListener("loadeddata", predictWebcam);
-        webcamRunning = true;
-        isMirrored = (currentFacingMode === 'user');
-    } catch (err) {
-        console.error("Camera access denied:", err);
-        alert("Camera access is required.");
-    }
-};
+    video.srcObject = stream;
+    video.onloadeddata = predictWebcam;
+    webcamRunning = true;
+    isMirrored = currentFacingMode === "user";
+}
 
-cameraToggleBtn.addEventListener('click', () => {
-    if (appRole !== 'SENSOR') return; // Only sensor toggles camera
-    currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+cameraToggleBtn.addEventListener("click", () => {
+    if (appRole !== "SENSOR") return;
+    currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
     enableCam();
 });
 
-mirrorToggleBtn.addEventListener('click', () => {
+mirrorToggleBtn.addEventListener("click", () => {
     isMirrored = !isMirrored;
-    mirrorToggleBtn.style.color = isMirrored ? '#00f3ff' : '#8892b0';
+    mirrorToggleBtn.style.color = isMirrored ? THEME.primary : THEME.inactive;
 });
 
+/* =========================
+   MAIN LOOP
+========================= */
 async function predictWebcam() {
-    if (Object.is(video.videoWidth, 0) || Object.is(video.videoHeight, 0)) {
-        window.requestAnimationFrame(predictWebcam);
-        return;
-    }
+    if (!video.videoWidth) return requestAnimationFrame(predictWebcam);
 
-    if (isMirrored) {
-        video.style.transform = "scaleX(-1)";
-    } else {
-        video.style.transform = "scaleX(1)";
-    }
-
+    video.style.transform = isMirrored ? "scaleX(-1)" : "scaleX(1)";
     canvasElement.width = video.videoWidth;
     canvasElement.height = video.videoHeight;
 
@@ -292,12 +265,9 @@ async function predictWebcam() {
     }
 
     const now = performance.now();
-    const fps = 1000 / (now - lastFrameTime);
+    fpsValue.innerText = Math.round(1000 / (now - lastFrameTime));
     lastFrameTime = now;
-    if (now % 10 < 1) fpsValue.innerText = Math.round(fps);
 
-    // Local Draw
-    canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
     if (isMirrored) {
@@ -305,53 +275,30 @@ async function predictWebcam() {
         canvasCtx.scale(-1, 1);
     }
 
-    const drawingUtils = new DrawingUtils(canvasCtx);
-    let detected = false;
+    const draw = new DrawingUtils(canvasCtx);
 
-    if (results.landmarks && results.landmarks.length > 0) {
-        detected = true;
+    if (results?.landmarks?.length) {
         bodyStatus.innerText = "DETECTED";
-        bodyStatus.style.color = "#00f3ff";
+        bodyStatus.style.color = THEME.primary;
         confidenceScore.innerText = "LIVE";
 
-        for (const landmarks of results.landmarks) {
-            drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS, {
-                color: "#00f3ff", lineWidth: 4
+        results.landmarks.forEach(lm => {
+            draw.drawConnectors(lm, PoseLandmarker.POSE_CONNECTIONS, {
+                color: THEME.primary,
+                lineWidth: 4
             });
-            drawingUtils.drawLandmarks(landmarks, {
-                color: "#ff0077", radius: 3, lineWidth: 2
+            draw.drawLandmarks(lm, {
+                color: THEME.secondary,
+                radius: 3
             });
-        }
+        });
 
-        // SEND TO HOST
-        if (conn && conn.open) {
-            conn.send({
-                type: 'landmarks',
-                landmarks: results.landmarks
-            });
-        }
-
+        conn?.open && conn.send({ type: "landmarks", landmarks: results.landmarks });
     } else {
         bodyStatus.innerText = "SEARCHING";
-        bodyStatus.style.color = "#8892b0";
+        bodyStatus.style.color = THEME.inactive;
         confidenceScore.innerText = "--";
-
-        // Also update Host if nothing found
-        if (conn && conn.open) {
-            conn.send({
-                type: 'stats',
-                env: envStatus.innerText,
-                lat: latVal.innerText,
-                lon: lonVal.innerText,
-                detected: false,
-                conf: "--"
-            });
-        }
     }
 
-    canvasCtx.restore();
-
-    if (webcamRunning === true) {
-        window.requestAnimationFrame(predictWebcam);
-    }
+    requestAnimationFrame(predictWebcam);
 }

@@ -1,95 +1,84 @@
-# PlexaMotion 5.0 🌐🦾
+# PlexaMotion 5.0 - The Interactive Motion Suite 🌐🦾
 
-> **Futuristic Real-Time Body Tracking & Remote Sensing System**
-> *Built with MediaPipe, PeerJS, and Open Web Technologies.*
+> **An advanced, browser-based computer vision application that transforms your webcam into an interactive motion controller.**
 
-![PlexaMotion Banner](https://via.placeholder.com/1200x400/0a192f/00f3ff?text=PlexaMotion+5.0)
+![PlexaMotion Banner](https://via.placeholder.com/1200x600/0a192f/00f3ff?text=PlexaMotion+Interactive+Suite)
 
-**PlexaMotion 5.0** is a cutting-edge web application that transforms any device into a motion intelligence sensor. It features a futuristic **Glassmorphism UI** and enables **"Through-Wall" Visibility** by linking a phone (Sensor) to a laptop (Display) via specific Peer-to-Peer data streaming.
-
----
-
-## ✨ Key Features
-
-### 🧍 Real-Time Body Intelligence
--   **Full Skeleton Tracking**: Uses MediaPipe Pose to detect 33 skeletal landmarks at 30+ FPS.
--   **Neon Aesthetic**: Visualizes motion with glowing cyan connections and pink joints.
--   **Mirror & Adjust**: Manual mirror toggle and auto-alignment for perfect viewing.
-
-### 📡 Remote Sensor Link (PeerJS)
--   **The "Through-Wall" Solution**: Turn your laptop into a "Mission Control" display.
--   **Wireless Streaming**: Walk away with your phone; it streams Body & GPS data instantly to your laptop screen over the internet.
--   **Zero Backend**: Uses WebRTC for direct device-to-device communication.
-
-### 📱 Mobile-First & PWA
--   **Installable App**: Add to Home Screen for a native app experience (fullscreen, no URL bar).
--   **Dual Camera Support**: Switch between Front and Back cameras for environmental scanning.
--   **Live GPS**: Continuous `watchPosition` updates for real-world location tracking.
+**PlexaMotion 5.0** has evolved from a simple body-tracking demo into a full suite of interactive experiences. Using the power of your device's camera and advanced machine learning models, this application offers multiple modes that turn your body's movements into direct input for fitness, gaming, and UI control.
 
 ---
 
-## 🛠️ Technology Stack
+## ✨ Features
 
--   **Frontend**: HTML5, CSS3 (Variables, Flexbox/Grid, Glassmorphism).
--   **Logic**: Modern JavaScript (ES6+ Modules).
--   **AI/CV Core**: [Google MediaPipe Pose](https://developers.google.com/mediapipe).
--   **Networking**: [PeerJS](https://peerjs.com/) (WebRTC wrapper) for P2P data sync.
--   **Maps/Env**: HTML5 Geolocation API.
+PlexaMotion now includes four distinct modes, each designed for a unique purpose:
 
----
+### 🏋️ AI Fitness Coach
+-   **Intelligent Repetition Counting**: Automatically counts your squats using real-time analysis of your body's joints.
+-   **Real-Time Form Feedback**: Provides on-screen advice to help you maintain proper form (e.g., "Great depth!", "Make sure your full body is visible!").
+-   **Workout Dashboard**: A dedicated panel displays your current exercise, rep count, and feedback messages.
 
-## 🚀 Deployment Guide (GitHub & Vercel)
+### 🎮 Interactive Motion Game
+-   **Body-As-A-Controller**: Play a fun and challenging "dodge-the-block" game using your body's position.
+-   **Intuitive Control**: Your player on screen mirrors your body's horizontal movement, controlled by the position of your nose.
+-   **Scoring and Replayability**: The game tracks your score and features a "Game Over" screen with a quick restart option.
 
-This project is optimized for **Vercel** deployment. Follow these steps to make it live for free:
+### 🖐️ Gesture-Based Control
+-   **Hands-Free Navigation**: Control a user interface with simple hand gestures.
+-   **Swipe Detection**: The application detects horizontal swipes of your right hand to navigate through a sample photo gallery.
+-   **Futuristic UI Control**: A proof-of-concept for controlling presentations, media players, or other applications without a mouse or keyboard.
 
-### Step 1: Push to GitHub
-1.  Create a new repository on [GitHub](https://github.com).
-2.  Upload/Push the `PlexaMotion 5.0` folder to the repository.
-
-### Step 2: Deploy on Vercel
-1.  Go to [Vercel.com](https://vercel.com) and sign up/log in.
-2.  Click **"Add New Project"**.
-3.  Select **"Import"** next to your GitHub repository.
-4.  Keep all settings default (Framework Preset: **Other**).
-5.  Click **Deploy**.
-6.  🎉 **Success!** You will get a link (e.g., `https://plexamotion.vercel.app`).
+### 📡 Remote Sensor Link
+-   **The "Through-Wall" Solution**: Turn a phone into a remote motion and GPS sensor, and view its data live on a separate laptop or desktop.
+-   **Peer-to-Peer Streaming**: Uses WebRTC (via PeerJS) for direct, low-latency, device-to-device communication over the internet with no backend server required.
 
 ---
 
 ## 📖 How to Use
 
-### Mode A: Single Device (Local)
-1.  Open the app on your Laptop or Phone.
-2.  Allow Camera & Location permissions.
-3.  See your skeleton in real-time.
+1.  Open the application in a modern web browser.
+2.  Allow the required **Camera** and **Location** permissions when prompted.
+3.  The application will start on the **Mode Selection** screen.
 
-### Mode B: Remote Sensor Link (Professional)
-*Use this to track yourself behind walls or remotely.*
+### Mode 1: AI Fitness Coach
+1.  Click the **[Fitness AI]** button.
+2.  Position yourself so your full body is visible to the camera.
+3.  Start performing squats. The **Fitness AI** panel on the right will automatically count your reps and provide feedback.
 
-1.  **Laptop (The Display)**:
-    -   Open the App.
-    -   Click **[Laptop Display]**.
-    -   Note the **4-digit ID** shown (e.g., `8521`).
+### Mode 2: Motion Game
+1.  Click the **[Motion Game]** button.
+2.  The game screen will appear over the video feed. Click **[Start Game]**.
+3.  Physically move your body left and right to control the player paddle at the bottom of the screen.
+4.  Dodge the falling red blocks. Your score increases for every block you successfully dodge.
 
-2.  **Phone (The Sensor)**:
-    -   Open the App on your phone.
-    -   Click **[Phone Sensor]**.
-    -   Enter the Laptop's ID.
-    -   Click **CONNECT**.
-
-3.  **Execute**:
-    -   Walk into another room with your phone.
-    -   Your laptop screen will display your live skeleton and GPS location!
+### Mode 3: Gesture Control
+1.  Click the **[Gesture Control]** button.
+2.  A sample photo gallery will appear over the video feed.
+3.  Raise your right hand so it is clearly visible.
+4.  **Swipe your hand horizontally** across your body to navigate between the photos.
 
 ---
 
-## 📲 Install as App
-1.  Open your Vercel link on your phone (Chrome/Safari).
-2.  Tap **Share (iOS)** or **Menu (Android)**.
-3.  Select **"Add to Home Screen"**.
-4.  Launch from your home screen for the full fullscreen experience.
+## 🛠️ Technology Stack
+
+-   **Frontend**: HTML5, CSS3 (Glassmorphism UI)
+-   **Core Logic**: Modern JavaScript (ES6+ Modules)
+-   **Computer Vision**: [Google MediaPipe Pose](https://developers.google.com/mediapipe) for real-time body landmark detection.
+-   **P2P Networking**: [PeerJS](https://peerjs.com/) (A wrapper for WebRTC).
+-   **Geolocation**: Standard HTML5 Geolocation API.
 
 ---
 
-*Developed by rajpratham| 2026*
+## 🚀 Deployment Guide
 
+This project is optimized for free and instant deployment on **Vercel**.
+
+1.  **Push to GitHub**: Create a GitHub repository and push the project files to it.
+2.  **Import to Vercel**:
+    -   Go to [Vercel.com](https://vercel.com) and sign in.
+    -   Click **"Add New Project"** and import the repository you just created.
+    -   Use the default settings (Framework Preset: **Other**).
+    -   Click **Deploy**.
+
+---
+
+*Developed by rajpratham | 2026*

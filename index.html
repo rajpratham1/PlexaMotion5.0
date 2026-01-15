@@ -18,6 +18,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a192f">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Material Icons -->
@@ -88,11 +89,61 @@
                     </button>
                     <video id="webcam" class="video-feed" autoplay playsinline></video>
                     <canvas id="output_canvas" class="mediapipe-canvas"></canvas>
+
+                    <!-- Game UI Overlay -->
+                    <div id="gameOverlay" class="hidden">
+                        <div id="gameStartScreen" class="game-ui-screen">
+                            <h2>Motion Dodge</h2>
+                            <p>Move your body to dodge the falling blocks!</p>
+                            <button id="startGameButton" class="action-btn">Start Game</button>
+                        </div>
+                        <div id="gameHud" class="hidden">
+                            <div class="hud-item">
+                                Score: <span id="gameScore">0</span>
+                            </div>
+                        </div>
+                        <div id="gameOverScreen" class="game-ui-screen hidden">
+                            <h2>Game Over</h2>
+                            <p>Final Score: <span id="finalScore">0</span></p>
+                            <button id="restartGameButton" class="action-btn">Restart</button>
+                        </div>
+                    </div>
+
+                    <!-- Gesture Control UI Overlay -->
+                    <div id="gestureOverlay" class="hidden">
+                        <div class="gallery-container">
+                            <div class="gallery-item active" style="background-image: url('https://picsum.photos/id/10/800/600')"></div>
+                            <div class="gallery-item" style="background-image: url('https://picsum.photos/id/20/800/600')"></div>
+                            <div class="gallery-item" style="background-image: url('https://picsum.photos/id/30/800/600')"></div>
+                            <div class="gallery-item" style="background-image: url('https://picsum.photos/id/40/800/600')"></div>
+                        </div>
+                        <div id="gesture-instructions">
+                            <span class="material-icons">waving_hand</span>
+                            <p>Swipe your hand left or right to navigate</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <!-- Right Panel: Intelligence Dashboard -->
             <aside class="dashboard-panel">
+
+                <!-- Card for Fitness AI -->
+                <div id="fitnessPanel" class="glass-card stat-card hidden">
+                    <div class="card-title">
+                        <span class="material-icons">fitness_center</span> Fitness AI
+                    </div>
+                    <div class="exercise-display">
+                        <span id="exerciseName">Squats</span>
+                    </div>
+                    <div class="rep-counter">
+                        <span id="repCount">0</span> Reps
+                    </div>
+                    <div class="feedback-box">
+                        <span class="material-icons">info</span>
+                        <span id="formFeedback">Start your workout!</span>
+                    </div>
+                </div>
 
                 <!-- Card 1: Body Tracking Status -->
                 <div class="glass-card stat-card glow-blue">
@@ -141,10 +192,49 @@
 
     </div>
 
-    <!-- Connection Modal -->
-    <div id="connectionModal" class="glass-bg-overlay">
+    <!-- Application Mode Modal -->
+    <div id="appModeModal" class="glass-bg-overlay">
         <div class="glass-card modal-content">
-            <h2>Select Mode</h2>
+            <h2>Select Application Mode</h2>
+            <div class="mode-buttons-grid">
+                <button id="startFitnessBtn" class="action-btn">
+                    <span class="material-icons">fitness_center</span>
+                    <div>
+                        <strong>Fitness AI</strong>
+                        <small>Exercise Tracking</small>
+                    </div>
+                </button>
+                <button id="startGameBtn" class="action-btn">
+                    <span class="material-icons">sports_esports</span>
+                    <div>
+                        <strong>Motion Game</strong>
+                        <small>Interactive Fun</small>
+                    </div>
+                </button>
+                <button id="startGestureBtn" class="action-btn">
+                    <span class="material-icons">waving_hand</span>
+                    <div>
+                        <strong>Gesture Control</strong>
+                        <small>Hands-Free Control</small>
+                    </div>
+                </button>
+            </div>
+            <div class="remote-link-section">
+                <button id="showRemoteLinkBtn" class="text-btn">
+                    Use Remote Sensor Link
+                    <span class="material-icons">arrow_forward</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Modal (Now for PeerJS) -->
+    <div id="connectionModal" class="glass-bg-overlay hidden">
+        <div class="glass-card modal-content">
+            <button id="backToAppModeBtn" class="back-btn" title="Go Back">
+                <span class="material-icons">arrow_back</span>
+            </button>
+            <h2>Remote Sensor Link</h2>
             <div class="mode-buttons">
                 <button id="startHostBtn" class="action-btn">
                     <span class="material-icons">desktop_windows</span>

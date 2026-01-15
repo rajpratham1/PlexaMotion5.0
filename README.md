@@ -80,5 +80,3 @@ This project is optimized for free and instant deployment on **Vercel**.
     -   Click **Deploy**.
 
 ---
-
-*Developed by rajpratham | 2026*

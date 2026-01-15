@@ -88,6 +88,8 @@ startFitnessBtn.addEventListener("click", () => selectMode('FITNESS'));
 startGameBtn.addEventListener("click", () => selectMode('GAME'));
 startGestureBtn.addEventListener("click", () => selectMode('GESTURE'));
 
+backToMenuBtn.addEventListener("click", resetToModeSelection);
+
 showRemoteLinkBtn.addEventListener("click", () => {
     appModeModal.classList.add("hidden");
     connectionModal.classList.remove("hidden");
@@ -102,6 +104,7 @@ backToAppModeBtn.addEventListener("click", () => {
 function selectMode(mode) {
     appMode = mode;
     appModeModal.classList.add("hidden");
+    backToMenuBtn.classList.remove("hidden"); // Show back button
 
     if (mode === 'FITNESS') {
         fitnessPanel.classList.remove("hidden");
@@ -121,6 +124,24 @@ function selectMode(mode) {
     if (!appInitialized) {
         initializeApp();
     }
+}
+
+function resetToModeSelection() {
+    appMode = null;
+
+    // Hide all panels and overlays
+    fitnessPanel.classList.add("hidden");
+    gameOverlay.classList.add("hidden");
+    gestureOverlay.classList.add("hidden");
+
+    // Reset game state if it exists
+    if (game) {
+        game.gameOver = true;
+    }
+    
+    // Hide back button and show main modal
+    backToMenuBtn.classList.add("hidden");
+    appModeModal.classList.remove("hidden");
 }
 
 const initializeApp = async () => {

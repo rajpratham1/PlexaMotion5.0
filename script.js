@@ -28,6 +28,9 @@ const startGameBtn = document.getElementById("startGameBtn");
 const startGestureBtn = document.getElementById("startGestureBtn");
 const showRemoteLinkBtn = document.getElementById("showRemoteLinkBtn");
 
+// Back Button
+const backToMenuBtn = document.getElementById("backToMenuBtn");
+
 // Fitness Panel
 const fitnessPanel = document.getElementById("fitnessPanel");
 const repCountEl = document.getElementById("repCount");

@@ -757,5 +757,16 @@ h1 {
     z-index: 10;
 }
 
+#backToMenuBtn {
+    margin-right: 1.5rem;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+#backToMenuBtn:hover {
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid var(--glass-border);
+}
+
 
 

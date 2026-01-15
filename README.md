@@ -91,5 +91,5 @@ This project is optimized for **Vercel** deployment. Follow these steps to make 
 
 ---
 
-*Developed by A.I. & Human Collaboration | 2026*
+*Developed by rajpratham| 2026*
 

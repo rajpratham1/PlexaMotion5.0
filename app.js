@@ -4,6 +4,7 @@ import { AudioManager } from "./audio-manager.js";
 import { StorageManager } from "./storage-manager.js";
 import { analyzePose } from "./fitness.js";
 import { analyzeHandGestures } from "./gestures.js";
+import { YogaCoach } from "./yoga.js";
 import Game from "./game.js";
 
 // Initialize Managers
@@ -14,6 +15,7 @@ const uiManager = new UIManager(audioManager);
 const videoElement = document.getElementById("webcam");
 const canvasElement = document.getElementById("output_canvas");
 const cameraManager = new CameraManager(videoElement, canvasElement);
+const yogaCoach = new YogaCoach(audioManager, uiManager);
 
 // State
 let appMode = null;
@@ -32,9 +34,10 @@ uiManager.onModeSelect = async (mode) => {
 
     if (mode === 'GAME') {
         game = new Game(canvasElement.width, canvasElement.height);
-        // Load high score
         const stats = storageManager.getStats();
         console.log("High Score Loaded:", stats.highScore);
+    } else if (mode === 'YOGA') {
+        yogaCoach.start();
     }
 
     const initialized = await cameraManager.initialize();
@@ -49,9 +52,11 @@ uiManager.onModeSelect = async (mode) => {
 };
 
 uiManager.onBack = () => {
-    // [USER REQ]: Stop camera when going back
     stopLoop();
     cameraManager.stopCamera();
+    if (appMode === 'YOGA') {
+        yogaCoach.stop();
+    }
     appMode = null;
     game = null;
 };
@@ -79,11 +84,10 @@ function loop() {
     const results = cameraManager.detectPose();
     const detected = results && results.landmarks && results.landmarks.length > 0;
 
-    // Draw Skeleton (unless in Game mode where we might want custom drawing)
+    // Draw Skeleton
     if (appMode !== 'GAME' || (game && game.gameOver)) {
         cameraManager.drawResults(results, appMode);
     } else if (game && !game.gameOver) {
-        // Clear canvas for game
         cameraManager.ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     }
 
@@ -95,11 +99,10 @@ function loop() {
             case 'FITNESS':
                 const analysis = analyzePose(landmarks);
                 uiManager.updateFitnessStats(analysis.reps, analysis.feedback);
+                break;
 
-                // Voice Feedback for Reps
-                if (analysis.reps > 0 && analysis.feedback.includes("Good") === false) {
-                    // Simple logic to avoid spamming
-                }
+            case 'YOGA':
+                yogaCoach.process(landmarks, now);
                 break;
 
             case 'GAME':

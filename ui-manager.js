@@ -30,9 +30,19 @@ export class UIManager {
     }
 
     initListeners() {
+        // --- Sound Effects Triggers ---
+        const addSound = (btn) => {
+            btn.addEventListener('mouseenter', () => this.audio.playHoverSound());
+            btn.addEventListener('click', () => this.audio.playClickSound());
+        };
+
+        // Apply to all buttons
+        document.querySelectorAll('button').forEach(addSound);
+
         document.getElementById("startFitnessBtn").addEventListener("click", () => this.selectMode('FITNESS'));
         document.getElementById("startGameBtn").addEventListener("click", () => this.selectMode('GAME'));
         document.getElementById("startGestureBtn").addEventListener("click", () => this.selectMode('GESTURE'));
+        document.getElementById("startYogaBtn").addEventListener("click", () => this.selectMode('YOGA'));
 
         document.getElementById("showRemoteLinkBtn").addEventListener("click", () => {
             this.startScreen.classList.add("hidden");
@@ -67,6 +77,9 @@ export class UIManager {
         } else if (mode === 'GESTURE') {
             this.gestureOverlay.classList.remove("hidden");
             this.audio.speak("Gesture Control Active.");
+        } else if (mode === 'YOGA') {
+            this.fitnessPanel.classList.remove("hidden");
+            this.audio.speak("Yoga Mode Activated.");
         }
 
         if (this.onModeSelect) this.onModeSelect(mode);

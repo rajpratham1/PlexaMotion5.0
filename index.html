@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlexaMotion 5.0 | Real-Time Body Tracking</title>
-    <meta name="description" content="Futuristic Real-Time Body Tracking & Environment Detection Web App">
+    <title>PlexaMotion 6.0 | Titanium Edition</title>
+    <meta name="description" content="Next-Gen Real-Time Body Tracking & AI Fitness Coach">
 
-    <!-- Google Fonts for Futuristic Look -->
+    <!-- Fonts: Orbitron (Headers), Rajdhani (Body), Share Tech Mono (Data) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@300;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;500;600;700&family=Share+Tech+Mono&display=swap"
         rel="stylesheet">
 
     <!-- PWA Manifest -->
@@ -22,8 +22,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Material Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Material Icons Sharp -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
 
@@ -36,6 +36,7 @@
             width: 100%;
             height: 100%;
             z-index: 10;
+            pointer-events: none;
         }
 
         .video-feed {
@@ -43,31 +44,40 @@
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
-            /* Mirror effect */
-            border-radius: 12px;
+            border-radius: 16px;
         }
     </style>
 </head>
 
 <body>
 
+    <div class="app-background"></div>
+    <div class="scan-lines"></div>
+
     <div class="app-container">
 
         <!-- Header -->
-        <header class="glass-header">
+        <header class="cyber-header">
             <div class="logo-area">
-                <img src="logo.svg" alt="PlexaMotion Logo" class="logo-icon"/>
+                <div class="logo-anim-container">
+                    <img src="logo.svg" alt="PlexaMotion Logo" class="logo-icon"/>
+                    <div class="logo-ring"></div>
+                </div>
                 <div>
-                    <h1>PlexaMotion 5.0</h1>
-                    <p class="subtitle">Real-Time Body & Motion Intelligence</p>
+                    <h1>PlexaMotion <span class="version-tag">6.0</span></h1>
+                    <p class="subtitle">NEURAL INTERFACE SYSTEM</p>
                 </div>
             </div>
-            <button id="backToMenuBtn" class="text-btn hidden">
-                <span class="material-icons">chevron_left</span>
-                Back
-            </button>
-            <div class="system-status">
-                <span class="status-dot"></span> System Active
+            
+            <div class="header-controls">
+                <button id="backToMenuBtn" class="cyber-btn sm hidden">
+                    <span class="material-icons-sharp">chevron_left</span>
+                    RETURN
+                </button>
+                <div class="system-status">
+                    <span class="pulse-dot"></span> 
+                    <span class="status-text">SYSTEM ONLINE</span>
+                </div>
             </div>
         </header>
 
@@ -75,56 +85,76 @@
         <main class="main-grid">
 
             <!-- Left Panel: Vision Feed -->
-            <section class="vision-panel glass-card">
-                <div class="vision-header">
-                    <h2><span class="material-icons">videocam</span> Live Feed</h2>
-                    <div class="live-indicator">LIVE</div>
+            <section class="vision-panel cyber-card">
+                <div class="card-header">
+                    <h2><span class="material-icons-sharp">videocam</span> OPTIC FEED</h2>
+                    <div class="live-tag">LIVE</div>
                 </div>
 
                 <div class="video-container" id="videoContainer">
-                    <div class="loading-overlay" id="loadingScreen">
-                        <div class="spinner"></div>
-                        <p>Initializing Neural Core...</p>
+                    
+                    <!-- Loading Sequence -->
+                    <div class="loading-overlay hidden" id="loadingScreen">
+                        <div class="cyber-spinner"></div>
+                        <div class="loading-text">INITIALIZING NEURAL NETWORKS...</div>
+                        <div class="loading-bar">
+                            <div class="loading-progress"></div>
+                        </div>
                     </div>
-                    <button id="cameraToggle" class="camera-toggle-btn" title="Switch Camera">
-                        <span class="material-icons">flip_camera_ios</span>
-                    </button>
-                    <button id="mirrorToggle" class="mirror-toggle-btn" title="Mirror View">
-                        <span class="material-icons">flip</span>
-                    </button>
+
+                    <!-- HUD Overlays -->
+                    <div class="camera-controls">
+                        <button id="cameraToggle" class="hud-btn" title="Cycle Optics">
+                            <span class="material-icons-sharp">cameraswitch</span>
+                        </button>
+                        <button id="mirrorToggle" class="hud-btn" title="Toggle Reflection">
+                            <span class="material-icons-sharp">flip</span>
+                        </button>
+                    </div>
+
                     <video id="webcam" class="video-feed" autoplay playsinline></video>
                     <canvas id="output_canvas" class="mediapipe-canvas"></canvas>
 
                     <!-- Game UI Overlay -->
                     <div id="gameOverlay" class="hidden">
-                        <div id="gameStartScreen" class="game-ui-screen">
-                            <h2>Motion Dodge</h2>
-                            <p>Move your body to dodge the falling blocks!</p>
-                            <button id="startGameButton" class="action-btn">Start Game</button>
+                        <div id="gameStartScreen" class="game-ui-screen glass-panel">
+                            <h2>MOTION DODGE</h2>
+                            <p>NEURAL SYNC REQUIRED. EVADE OBSTACLES.</p>
+                            <button id="startGameButton" class="cyber-btn lg glitch-effect">INITIATE SEQUENCE</button>
                         </div>
                         <div id="gameHud" class="hidden">
-                            <div class="hud-item">
-                                Score: <span id="gameScore">0</span>
+                            <div class="hud-score">
+                                <span class="label">SCORE</span>
+                                <span id="gameScore" class="value">0</span>
                             </div>
                         </div>
-                        <div id="gameOverScreen" class="game-ui-screen hidden">
-                            <h2>Game Over</h2>
-                            <p>Final Score: <span id="finalScore">0</span></p>
-                            <button id="restartGameButton" class="action-btn">Restart</button>
+                        <div id="gameOverScreen" class="game-ui-screen glass-panel hidden">
+                            <h2>SYNC FAILURE</h2>
+                            <p>FINAL SCORE: <span id="finalScore" class="score-highlight">0</span></p>
+                            <button id="restartGameButton" class="cyber-btn lg">REBOOT</button>
                         </div>
                     </div>
 
                     <!-- Gesture Control UI Overlay -->
                     <div id="gestureOverlay" class="hidden">
                         <div class="gallery-container">
-                            <div class="gallery-item active" style="background-image: url('https://picsum.photos/id/10/800/600')"></div>
-                            <div class="gallery-item" style="background-image: url('https://picsum.photos/id/20/800/600')"></div>
-                            <div class="gallery-item" style="background-image: url('https://picsum.photos/id/30/800/600')"></div>
-                            <div class="gallery-item" style="background-image: url('https://picsum.photos/id/40/800/600')"></div>
+                            <!-- New images from Unsplash for better aesthetics -->
+                            <div class="gallery-item active" style="background-image: url('https://images.unsplash.com/photo-1542831371-d531d36971e6?q=80&w=1000&auto=format&fit=crop')">
+                                <div class="item-caption">CYBER CITY</div>
+                            </div>
+                            <div class="gallery-item" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop')">
+                                <div class="item-caption">NEON RAIN</div>
+                            </div>
+                            <div class="gallery-item" style="background-image: url('https://images.unsplash.com/photo-1515462277126-2dd0c162007a?q=80&w=1000&auto=format&fit=crop')">
+                                <div class="item-caption">RETRO GRID</div>
+                            </div>
+                            <div class="gallery-item" style="background-image: url('https://images.unsplash.com/photo-1531297461136-82lw9b285bb6?q=80&w=1000&auto=format&fit=crop')">
+                                <div class="item-caption">DATA STREAM</div>
+                            </div>
                         </div>
-                        <div id="gesture-instructions">
-                            <span class="material-icons">waving_hand</span>
-                            <p>Swipe your hand left or right to navigate</p>
+                        <div id="gesture-instructions" class="instruction-box">
+                            <span class="material-icons-sharp">waving_hand</span>
+                            <p>INITIATE SWIPE GESTURE</p>
                         </div>
                     </div>
                 </div>
@@ -134,37 +164,41 @@
             <aside class="dashboard-panel">
 
                 <!-- Card for Fitness AI -->
-                <div id="fitnessPanel" class="glass-card stat-card hidden">
-                    <div class="card-title">
-                        <span class="material-icons">fitness_center</span> Fitness AI
+                <div id="fitnessPanel" class="cyber-card stat-card accent-pink hidden">
+                    <div class="card-header-sm">
+                        <span class="material-icons-sharp">fitness_center</span> COACH AI
                     </div>
                     <div class="exercise-display">
-                        <span id="exerciseName">Squats</span>
+                        <span id="exerciseName">SQUATS</span>
                     </div>
                     <div class="rep-counter">
-                        <span id="repCount">0</span> Reps
+                        <span id="repCount">0</span>
+                        <span class="unit">REPS</span>
                     </div>
                     <div class="feedback-box">
-                        <span class="material-icons">info</span>
-                        <span id="formFeedback">Start your workout!</span>
+                        <span class="material-icons-sharp">info</span>
+                        <span id="formFeedback">AWAITING INPUT...</span>
                     </div>
                 </div>
 
                 <!-- Card 1: Body Tracking Status -->
-                <div class="glass-card stat-card glow-blue">
-                    <div class="card-title">
-                        <span class="material-icons">directions_walk</span> Body Tracking
+                <div class="cyber-card stat-card accent-blue">
+                    <div class="card-header-sm">
+                        <span class="material-icons-sharp">accessibility_new</span> SKELETAL TRACKING
                     </div>
-                    <div class="card-value" id="bodyStatus">Searching...</div>
-                    <div class="card-sub">Confidence: <span id="confidenceScore">0%</span></div>
+                    <div class="card-value-lg" id="bodyStatus">SCANNING</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="confidenceBar" style="width: 0%"></div>
+                    </div>
+                    <div class="card-sub">CONFIDENCE: <span id="confidenceScore">0%</span></div>
                 </div>
 
                 <!-- Card 2: Environment Detection -->
-                <div class="glass-card stat-card glow-cyan">
-                    <div class="card-title">
-                        <span class="material-icons">public</span> Environment
+                <div class="cyber-card stat-card accent-cyan">
+                    <div class="card-header-sm">
+                        <span class="material-icons-sharp">public</span> GLOBAL POSITION
                     </div>
-                    <div class="card-value neon-text" id="envStatus">Scanning...</div>
+                    <div class="card-value neon-text" id="envStatus">SEARCHING SAT...</div>
                     <div class="coords-grid">
                         <div class="coord-item">
                             <span class="label">LAT</span>
@@ -178,9 +212,9 @@
                 </div>
 
                 <!-- Card 3: Performance -->
-                <div class="glass-card stat-card">
-                    <div class="card-title">
-                        <span class="material-icons">speed</span> Performance
+                <div class="cyber-card stat-card accent-green">
+                    <div class="card-header-sm">
+                        <span class="material-icons-sharp">memory</span> PROCESSING
                     </div>
                     <div class="fps-meter">
                         <span class="fps-val" id="fpsValue">0</span> <span class="fps-unit">FPS</span>
@@ -191,84 +225,82 @@
         </main>
 
         <!-- Footer -->
-        <footer class="glass-footer">
-            <p>PlexaMotion 5.0 | Built with <span class="highlight">MediaPipe</span> & Open Technologies</p>
+        <footer class="cyber-footer">
+            <p>PLEXAMOTION 6.0 // POWERED BY <span class="highlight">MEDIAPIPE</span> // QUANTUM READY</p>
         </footer>
 
     </div>
 
     <!-- Application Mode Modal -->
-    <div id="appModeModal" class="glass-bg-overlay">
-        <div class="glass-card modal-content">
-            <h2>Select Application Mode</h2>
+    <div id="appModeModal" class="cyber-overlay">
+        <div class="cyber-modal glass-panel">
+            <h2 class="modal-title">SELECT PROTOCOL</h2>
             <div class="mode-buttons-grid">
-                <button id="startFitnessBtn" class="action-btn">
-                    <span class="material-icons">fitness_center</span>
-                    <div>
-                        <strong>Fitness AI</strong>
-                        <small>Exercise Tracking</small>
+                <button id="startFitnessBtn" class="mode-card-btn">
+                    <div class="icon-wrapper pink">
+                        <span class="material-icons-sharp">fitness_center</span>
+                    </div>
+                    <div class="text-content">
+                        <strong>FITNESS AI</strong>
+                        <small>COACHING MODULE</small>
                     </div>
                 </button>
-                <button id="startGameBtn" class="action-btn">
-                    <span class="material-icons">sports_esports</span>
-                    <div>
-                        <strong>Motion Game</strong>
-                        <small>Interactive Fun</small>
+                <button id="startGameBtn" class="mode-card-btn">
+                    <div class="icon-wrapper blue">
+                        <span class="material-icons-sharp">sports_esports</span>
+                    </div>
+                    <div class="text-content">
+                        <strong>MOTION GAME</strong>
+                        <small>REFLEX TRAINING</small>
                     </div>
                 </button>
-                <button id="startGestureBtn" class="action-btn">
-                    <span class="material-icons">waving_hand</span>
-                    <div>
-                        <strong>Gesture Control</strong>
-                        <small>Hands-Free Control</small>
+                <button id="startGestureBtn" class="mode-card-btn">
+                    <div class="icon-wrapper cyan">
+                        <span class="material-icons-sharp">waving_hand</span>
+                    </div>
+                    <div class="text-content">
+                        <strong>GESTURE CONTROL</strong>
+                        <small>REMOTE INTERFACE</small>
                     </div>
                 </button>
             </div>
             <div class="remote-link-section">
-                <button id="showRemoteLinkBtn" class="text-btn">
-                    Use Remote Sensor Link
-                    <span class="material-icons">arrow_forward</span>
+                <button id="showRemoteLinkBtn" class="text-link-btn">
+                     ESTABLISH REMOTE LINK <span class="material-icons-sharp">arrow_forward</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Connection Modal (Now for PeerJS) -->
-    <div id="connectionModal" class="glass-bg-overlay hidden">
-        <div class="glass-card modal-content">
-            <button id="backToAppModeBtn" class="back-btn" title="Go Back">
-                <span class="material-icons">arrow_back</span>
+    <!-- Connection Modal -->
+    <div id="connectionModal" class="cyber-overlay hidden">
+        <div class="cyber-modal glass-panel">
+            <button id="backToAppModeBtn" class="back-icon-btn" title="Go Back">
+                <span class="material-icons-sharp">arrow_back</span>
             </button>
-            <h2>Remote Sensor Link</h2>
+            <h2 class="modal-title">REMOTE UPLINK</h2>
             <div class="mode-buttons">
-                <button id="startHostBtn" class="action-btn">
-                    <span class="material-icons">desktop_windows</span>
-                    <div>
-                        <strong>Laptop Display</strong>
-                        <small>View Data Remotely</small>
-                    </div>
+                <button id="startHostBtn" class="cyber-btn lg">
+                    <span class="material-icons-sharp">desktop_windows</span>
+                    DISPLAY UNIT
                 </button>
-                <button id="startSensorBtn" class="action-btn outline">
-                    <span class="material-icons">smartphone</span>
-                    <div>
-                        <strong>Phone Sensor</strong>
-                        <small>Send Data</small>
-                    </div>
+                <button id="startSensorBtn" class="cyber-btn lg outline">
+                    <span class="material-icons-sharp">smartphone</span>
+                    SENSOR UNIT
                 </button>
             </div>
 
             <!-- Host Panel -->
             <div id="hostPanel" class="hidden panel-section">
-                <p>Your ID (Enter this on Phone):</p>
-                <div class="id-display" id="myPeerId">Generating...</div>
-                <p class="status-text" id="connectionStatus">Waiting for connection...</p>
+                <p>ACCESS CODE:</p>
+                <div class="id-display" id="myPeerId">GENERATING...</div>
+                <p class="status-text blink" id="connectionStatus">AWAITING HANDSHAKE...</p>
             </div>
 
             <!-- Client Panel -->
             <div id="clientPanel" class="hidden panel-section">
-                <input type="text" id="remotePeerIdInput" placeholder="Enter Laptop ID (e.g. 12ab34)"
-                    class="glass-input">
-                <button id="connectBtn" class="connect-btn">CONNECT</button>
+                <input type="text" id="remotePeerIdInput" placeholder="S-X-X-X-X" class="cyber-input">
+                <button id="connectBtn" class="cyber-btn full">ESTABLISH CONNECTION</button>
             </div>
         </div>
     </div>
@@ -276,8 +308,9 @@
     <!-- Scripts -->
     <!-- PeerJS -->
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
-    <!-- Load MediaPipe Tasks Vision Bundle -->
-    <script type="module" src="script.js"></script>
+    
+    <!-- Main App Module -->
+    <script type="module" src="app.js"></script>
 </body>
 
 </html>
